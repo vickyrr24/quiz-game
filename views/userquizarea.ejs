@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <!--<script src="script1.js"></script>
+    <link rel="stylesheet" type="text/css" href="quiz.css">-->
+    <title>Quiz</title>
+    <style>
+        .dashboard
+{
+ color: rgba(235, 210, 68, 0.925);
+ margin: auto;
+ width: 60%;
+ border: 3px solid rgb(201, 219, 174);
+ padding: 10px;
+ text-align: center;
+}
+select {
+    width: 175px;
+    height: 30px;
+    padding: 5px 10px;    
+  }
+body{
+    background-color:black;
+}
+h1{
+    color:white;
+    text-align: center;
+}
+h3{
+    color:white;
+    font-style: italic;
+    font-size: large;
+    
+}
+.onboard{
+    color:white;
+    margin:auto;
+    width:60%;
+    padding:20px;
+}
+p{
+    color:white;
+    text-align: center;
+}
+.active{
+    display: block!important;
+}
+#result{
+    display: none;
+}
+.hide{
+    display: none;
+}
+    </style>
+</head>
+<body ng-app="myapp">
+    <div ng-controller="myctrl" class="dashboard">
+        <h1>{{name}}</h1>
+        <p>{{log}}</p>
+    </div>
+    <div ng-controller="quiz" class="onboard">
+            <h3 class="question">Question no: {{index+1}} </h3>
+            <p>{{q[index].questions}}</p>
+            <div id="hide">
+                <select ng-model="ans" ng-options="x for x in q[index].options"></select>
+                <button  ng-click="next()" type="button">Submit</button>
+            </div>
+            <p id="result">Correct : {{crt}} <span> Incorrect : {{incrt}}</span></p>
+           
+        </div>
+    </div>    
+</body>
+<script>
+    var app=angular.module('myapp',[])
+app.controller('myctrl',function($scope,$http){
+    $scope.name="General Quiz";
+    $http({
+        method: 'POST',
+        url: '/userlogin'
+
+    }).then(function success(response) {
+    $scope.log = response.info;
+    console.log(response.info)
+
+    }, function error(response) {
+
+    });
+});
+
+app.controller("quiz",function($scope,$http){
+    $http({
+        method: 'GET',
+        url: '/quizarea'
+
+    }).then(function success(response) {
+    // console.log(response.data)
+    $scope.q = response.data;
+
+    }, function error(response) {
+
+    });
+    $scope.index=0;
+    $scope.crt = 0;
+    $scope.incrt=0;
+    $scope.next = function(){
+        if($scope.index<=$scope.q.length-1){
+        $scope.index = $scope.index + 1;
+        // console.log($scope.q[$scope.index-1].answer);
+        document.querySelector("#result").removeAttribute("class","active")
+        if($scope.ans==$scope.q[$scope.index-1].answer){
+            //console.log("correct")
+            $scope.crt = $scope.crt+1;
+        }else{
+           // console.log("incorrect");
+            $scope.incrt = $scope.incrt + 1;
+        }
+        
+        }
+        if($scope.index==$scope.q.length){
+            // console.log($scope.crt);
+            // console.log($scope.incrt);
+            document.querySelector(".question").textContent = "";
+            document.querySelector("#result").setAttribute("class","active"); 
+            document.querySelector("#hide").setAttribute("class","hide");
+        }
+    }
+});
+
+</script>
+</html>
